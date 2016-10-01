@@ -39,7 +39,7 @@ router! {
 }
 ```
 
-#### Model
+#### Model (diesel-rs)
 
 ```rust
 table! {
