@@ -1,11 +1,17 @@
+#![feature(custom_attribute, custom_derive, plugin, question_mark, specialization, trace_macros, log_syntax)]
+#![plugin(clippy, serde_macros)]
+trace_macros!(true);
+
 #[macro_use]
 extern crate log;
 extern crate term;
+#[macro_use]
 extern crate clap;
 
 use log::{LogLevelFilter};
-use clap::app::App;
+use clap::{App, Arg, SubCommand};
 
+mod lib;
 mod logger;
 
 fn main() {
@@ -17,7 +23,7 @@ fn main() {
             .short("v")
             .multiple(true)
             .help("Sets the level of verbosity"))
-        .subcommand(SubCommand::with_name("test")
+        .subcommand(SubCommand::with_name("run")
             .about("controls testing features"))
         .get_matches();
     let level = match matches.occurrences_of("v") {
@@ -25,11 +31,10 @@ fn main() {
         1 => LogLevelFilter::Debug,
         _ => LogLevelFilter::Trace,
     };
-
     logger::init(level).unwrap();
-    error!("Hello World!");
-    warn!("Hello World!");
-    info!("Hello World! {:?}", matches);
-    debug!("Hello World!");
-    trace!("Hello World!");
+
+    match matches.subcommand() {
+        ("run", _) => {},
+        _ => println!("{}", matches.usage()),
+    }
 }

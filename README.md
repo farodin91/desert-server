@@ -17,14 +17,11 @@ A concept to use rust as a web server
 
 ```rust
 chain! {
-  chain -> [
+  Index(ReturnError) {
     JsonRequest<>,
     AccessTokenAuth,
-    Processing,
-  ],
-  error -> [
-    ReturnError,
-  ]  
+    Processing,    
+  }
 };
 ```
 
@@ -32,10 +29,22 @@ chain! {
 
 ```rust
 router! {
-  ("/", Get) -> chain! {...},
-  ("/", Post) -> chain! {...},
-  ("/:id/", Post) -> chain! {...},
-  "/api/" -> router! {...},
+  IndexRouter {
+    ("/", Get) -> chain! {...},
+    ("/", Post) -> chain! {...},
+    ("/:id/", Post) -> chain! {...},
+    "/api/" -> router! {...},    
+  }
+}
+```
+
+#### Server
+
+```rust
+server! {
+  Server(8000) {
+    IndexRouter
+  }
 }
 ```
 
@@ -62,15 +71,17 @@ table! {
 * post `%s/:id` -> create
 * delete `%s/:id?` -> delete
 
+```
+blueprint! {...} -> Router
+```
 
 ```rust
 blueprint! {
-  table -> users,
-  methods -> {
+  User(users) {
     get -> [],
     create -> [AccessTokenAuth],
     update -> [AccessTokenAuth],
     delete -> [AccessTokenAuth],
-  },
+  }
 };
 ```
