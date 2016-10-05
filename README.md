@@ -6,22 +6,61 @@ A concept to use rust as a web server
 * Routing
 * Customizable
 * Fast development
-* Secure
+* View System
 * Admin backend
 
 
 ## Based on
 
-* Futures (tokio-core)
-* Hyper
+* Hyper 0.10
 * Diesel
-
+* Macros 1.1 / Macros 2.0
 
 ## Idea's
 
-### Macros
+### Server
 
-#### Chain
+* defining multiple endpoints
+* possible `DDos` prevention functionality
+
+```rust
+
+server! {
+  HttpServer(8080) {
+    IndexMount
+  }
+  HttpsServer(8443) {
+    SecureMount
+  }
+}
+```
+
+### Mount Point
+
+* Router
+* Chain
+* Serve
+* Blueprint
+
+### Chain
+
+* A `Chain` has an defined Input and an defined Output.
+* A `Chain` could be a future or linear function.
+
+```rust
+pub enum ChainResult<T, E> {
+  Future(T),
+  Linear(T),
+  Error(E),
+}
+
+pub trait Chain {
+  pub Input;
+  pub Output;
+  pub Error;
+  pub chain(&self, input: Input) -> ChainResult<Output, Error>
+}
+```
 
 ```rust
 chain! {
@@ -33,7 +72,12 @@ chain! {
 };
 ```
 
-#### Router
+### Router
+
+* nested router
+* matching use finite automate
+* global before and after `Chain`'s
+
 
 ```rust
 router! {
@@ -46,41 +90,30 @@ router! {
 }
 ```
 
-#### Server
+### Static files
 
 ```rust
-server! {
-  Server(8000) {
-    IndexRouter
-  }
-}
 ```
 
-#### Model (diesel-rs)
+### Blueprint
 
-```rust
-table! {
-  users {
-    id -> Text,
-    password_hash -> Text,
-    active -> Bool,
-    created_at -> Timestamp,
-    updated_at -> Timestamp,
-  }
-}
-```
-
-#### Blueprint
+* using blueprint to easily write a customizable `REST` Api.
 
 * get `%s` - get
 * get `%s/:id` -> get
 * post `%s` -> create
-* put `%s/:id` ->
+* put `%s/:id` -> update
 * post `%s/:id` -> create
 * delete `%s/:id?` -> delete
+* hasMany
+  * post `%s/add` -> create
+  * put `%s/update/:id` -> update
+  * delete `%s/remove/:id` -> delete
+* hasOne
+  * put `%s/:key` -> update
 
 ```
-blueprint! {...} -> Router
+blueprint! {...} -> Mount
 ```
 
 ```rust
@@ -97,5 +130,39 @@ blueprint! {
       before -> [AccessTokenAuth]
     },
   }
+};
+```
+
+### Model (diesel-rs)
+
+* Generate a Insertable, Queryable and Identifiable
+
+```rust
+table! {
+  users {
+    id -> Text,
+    password_hash -> Text,
+    active -> Bool,
+    created_at -> Timestamp,
+    updated_at -> Timestamp,
+  }
+}
+```
+
+### View
+
+* pattern precompile view's
+* possible caching
+* shadow function for (server side rendering (React))
+* hot reload
+
+```rust
+let value = html! {
+  head! {
+    title! {
+      format!("{:?}", title),
+    }
+  },
+  body! {...},
 };
 ```
