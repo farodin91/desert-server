@@ -3,9 +3,17 @@ A concept to use rust as a web server
 
 ## Concept
 
-* Based on Futures (tokio-core)
-* Hyper
 * Routing
+* Customizable
+* Fast development
+* Secure
+* Admin backend
+
+
+## Based on
+
+* Futures (tokio-core)
+* Hyper
 * Diesel
 
 
@@ -17,7 +25,7 @@ A concept to use rust as a web server
 
 ```rust
 chain! {
-  Index(ReturnError) {
+  GetIndexChain(ReturnError) {
     JsonRequest<>,
     AccessTokenAuth,
     Processing,    
@@ -30,9 +38,9 @@ chain! {
 ```rust
 router! {
   IndexRouter {
-    ("/", Get) -> chain! {...},
-    ("/", Post) -> chain! {...},
-    ("/:id/", Post) -> chain! {...},
+    ("/", Get) -> chain!{...},
+    ("/", Post) -> chain!{},
+    ("/:id/", Post) -> chain!{...},
     "/api/" -> router! {...},    
   }
 }
@@ -79,9 +87,15 @@ blueprint! {...} -> Router
 blueprint! {
   User(users) {
     get -> [],
-    create -> [AccessTokenAuth],
-    update -> [AccessTokenAuth],
-    delete -> [AccessTokenAuth],
+    create -> {
+      before -> [AccessTokenAuth]
+    },
+    update -> {
+      before -> [AccessTokenAuth]
+    },
+    delete -> {
+      before -> [AccessTokenAuth]
+    },
   }
 };
 ```
