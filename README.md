@@ -13,7 +13,9 @@ A concept to use rust as a web server
 ## Based on
 
 * Hyper 0.10
+* Futures/tokio
 * Diesel
+* Serde
 * Macros 1.1 / Macros 2.0
 
 ## Idea's
@@ -22,6 +24,7 @@ A concept to use rust as a web server
 
 * defining multiple endpoints
 * possible `DDos` prevention functionality
+* Mount points
 
 ```rust
 
@@ -35,30 +38,19 @@ server! {
 }
 ```
 
-### Mount Point
-
-* Router
-* Chain
-* Serve
-* Blueprint
-
 ### Chain
 
 * A `Chain` has an defined Input and an defined Output.
-* A `Chain` could be a future or linear function.
+* A `Chain` are futures
+* Linear functions can be used by a macro `to_future!{...}`.
 
 ```rust
-pub enum ChainResult<T, E> {
-  Future(T),
-  Linear(T),
-  Error(E),
-}
 
 pub trait Chain {
   pub Input;
   pub Output;
   pub Error;
-  pub chain(&self, input: Input) -> ChainResult<Output, Error>
+  pub chain(&self, input: Input) -> Future<Output, Error>
 }
 ```
 
@@ -92,8 +84,10 @@ router! {
 
 ### Static files
 
-```rust
-```
+* Serving multiples files
+* Possible chaining to add Watermarks to image
+  * need a way cache this
+* Resolving index-files automatic or hard coded.
 
 ### Blueprint
 
@@ -112,10 +106,6 @@ router! {
 * hasOne
   * put `%s/:key` -> update
 
-```
-blueprint! {...} -> Mount
-```
-
 ```rust
 blueprint! {
   User(users) {
@@ -131,22 +121,6 @@ blueprint! {
     },
   }
 };
-```
-
-### Model (diesel-rs)
-
-* Generate a Insertable, Queryable and Identifiable
-
-```rust
-table! {
-  users {
-    id -> Text,
-    password_hash -> Text,
-    active -> Bool,
-    created_at -> Timestamp,
-    updated_at -> Timestamp,
-  }
-}
 ```
 
 ### View
@@ -165,4 +139,20 @@ let value = html! {
   },
   body! {...},
 };
+```
+
+### Model (diesel-rs)
+
+* Generate a Insertable, Queryable and Identifiable
+
+```rust
+table! {
+  users {
+    id -> Text,
+    password_hash -> Text,
+    active -> Bool,
+    created_at -> Timestamp,
+    updated_at -> Timestamp,
+  }
+}
 ```
